@@ -9,7 +9,9 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var score = 0
+    @State private var turn = 1
     @State private var showingScore = false
+    @State private var showingFinalScore = false
     @State private var scoreTitle = ""
     @State private var countries = ["Estonia", "France", "Germany", "Ireland", "Italy", "Nigeria", "Poland", "Russia", "Spain", "UK", "US"]
     @State private var correctAnswer = Int.random(in: 0...2)
@@ -70,6 +72,11 @@ struct ContentView: View {
         } message: {
             Text("Your score is \(score)")
         }
+        .alert(scoreTitle, isPresented: $showingFinalScore) {
+            Button("Restart", action: restartGame)
+        } message: {
+            Text("Your final score is \(score)/\(turn)")
+        }
     }
     
     func flagTapped(_ number: Int) {
@@ -78,15 +85,29 @@ struct ContentView: View {
             score += 1
         } else {
             scoreTitle = "Wrong! You chose the flag of \(countries[number])"
-            score -= 1
+            if score > 0 {
+                score -= 1
+            }
         }
         
+        if turn == 3 {
+            showingFinalScore = true
+            return
+        }
+        
+        turn += 1
         showingScore = true
     }
     
     func askQuestion() {
         countries.shuffle()
         correctAnswer = Int.random(in: 0...2)
+    }
+    
+    func restartGame() {
+        turn = 1
+        score = 0
+        askQuestion()
     }
 }
 
