@@ -30,6 +30,10 @@ struct ContentView: View {
     @State private var scoreTitle = ""
     @State private var countries = ["Estonia", "France", "Germany", "Ireland", "Italy", "Nigeria", "Poland", "Russia", "Spain", "UK", "US"]
     @State private var correctAnswer = Int.random(in: 0...2)
+    @State private var animationAmount = 0.0
+    @State private var opacityAmount = 1.0
+    @State private var buttonTapped = 0
+    @State private var scaleSize = 1.0
     
     var body: some View {
         ZStack {
@@ -57,11 +61,18 @@ struct ContentView: View {
                     
                     ForEach(0..<3) { number in
                         Button {
-                            flagTapped(number)
+                            buttonTapped = number
+                            withAnimation {
+                                flagTapped(number)
+                            }
                         } label: {
                             Image(countries[number])
                                 .editFlag()
                         }
+                        .rotation3DEffect(.degrees(number == buttonTapped ? animationAmount : 0.0), axis: (x: 0, y: 1, z: 0))
+                        .opacity(buttonTapped != number ? opacityAmount : 1.0)
+                        .scaleEffect(buttonTapped != number ?scaleSize : 1.0)
+                        .animation(.default, value: buttonTapped)
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -93,6 +104,11 @@ struct ContentView: View {
     }
     
     func flagTapped(_ number: Int) {
+        
+        opacityAmount = 0.25
+        animationAmount += 360
+        scaleSize = 0.5
+        
         if number == correctAnswer {
             scoreTitle = "Correct"
             score += 1
@@ -115,12 +131,16 @@ struct ContentView: View {
     func askQuestion() {
         countries.shuffle()
         correctAnswer = Int.random(in: 0...2)
+        opacityAmount = 1.0
+        scaleSize = 1.0
     }
     
     func restartGame() {
         turn = 1
         score = 0
         askQuestion()
+        opacityAmount = 1.0
+        scaleSize = 1.0
     }
 }
 
